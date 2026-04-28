@@ -1,5 +1,7 @@
 Work Order Rules
 
+These rules define how work orders affect maintenance tracking and data integrity.
+
 Completion Behavior
 - Completing a work order updates maintenance_status for all included maintenance tasks
 - The update sets "last performed" values (date and odometer) based on the work order
