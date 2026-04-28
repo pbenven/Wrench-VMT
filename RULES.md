@@ -5,6 +5,7 @@ These rules define how work orders affect maintenance tracking and data integrit
 Completion Behavior
 - Completing a work order updates maintenance_status for all included maintenance tasks
 - The update sets "last performed" values (date and odometer) based on the work order
+- A work order cannot be completed more than once without being reopened
 
 Reopen Behavior
 - A work order can only be reopened if it is the most recent record affecting its tasks
