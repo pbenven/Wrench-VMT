@@ -1,0 +1,38 @@
+services:
+
+  db:
+    image: postgres:latest
+    volumes:
+      - vehicle_maintenance_pgdata:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vehicle_maintenance_db
+    networks:
+      - vm_net
+    restart: unless-stopped
+
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./public:/app/public
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: vehicle_maintenance_db
+    depends_on:
+      - db
+    networks:
+      - vm_net
+    restart: unless-stopped
+
+networks:
+  vm_net:
+
+volumes:
+  vehicle_maintenance_pgdata:
+    external: true

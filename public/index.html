@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vehicle Maintenance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* TOKENS */
+    :root {
+      /* --bg:          #50585f; */
+      --bg:          #6e757a;
+      /*--surface:     #23262b;
+      --surface2:    #2c3038;*/
+      --surface:     #454a53;
+      --surface2:    #535b6b;
+      --border:      #3a3f47;
+      --accent:      #e07b22;
+      --accent-dim:  #a85c18;
+      /*--text:        #dde1e7;
+      --text-muted:  #7a8290;*/
+      --text:        #dde1e7;
+      --text-muted:  #96a0af;
+      --success:     #4caf7d;
+      --danger:      #e05252;
+      --radius:      6px;
+      --font-head:   'Barlow Condensed', sans-serif;
+      --font-body:   'Barlow', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    #app-header {
+      background: var(--surface);
+      border-bottom: 3px solid var(--accent);
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+    #app-header h1 {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    #app-header span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    #tab-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 2px;
+      padding: 0 1.5rem;
+    }
+    #tab-bar button {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-head);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 0.7rem 1.1rem;
+      text-transform: uppercase;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    #tab-bar button:hover  { color: var(--text); }
+    #tab-bar button.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    h2 {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-family: var(--font-head);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0.7rem 0 0.4rem;
+    }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      padding: 0.45rem 0.7rem;
+      width: 100%;
+      max-width: 320px;
+      transition: border-color 0.15s;
+      margin-bottom: 0;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.35rem 0;
+    }
+    .check-row label {
+      margin: 0;
+      text-transform: none;
+      letter-spacing: normal;
+      font-size: 0.93rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    button {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--font-head);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      padding: 0.5rem 1.1rem;
+      text-transform: uppercase;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    button:hover:not(:disabled) { background: var(--border); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #111;
+    }
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-dim);
+      border-color: var(--accent-dim);
+    }
+    button.danger { border-color: var(--danger); color: var(--danger); }
+    button.danger:hover:not(:disabled) { background: var(--danger); color: #fff; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0; }
+    #openOrders { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+    #openOrders button {
+      font-size: 0.82rem;
+      padding: 0.35rem 0.8rem;
+      border-color: var(--accent-dim);
+      color: var(--accent);
+    }
+    #openOrders button:hover:not(:disabled) { background: var(--accent); color: #111; }
+    #wo_mode_heading { color: var(--accent); font-size: 1.25rem; }
+    #wo_instruction {
+      font-style: normal;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      padding: 0.5rem 0.8rem;
+      border-left: 3px solid var(--accent-dim);
+      background: var(--surface);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    #wo_status, #status { font-size: 0.88rem; min-height: 1.2rem; margin: 0.4rem 0; }
+    #statusPanel {
+      background: var(--surface) !important;
+      border: 1px solid var(--accent-dim) !important;
+      border-radius: var(--radius) !important;
+      margin-top: 1rem !important;
+      padding: 1rem 1.2rem !important;
+      max-width: 480px !important;
+    }
+    #statusPanel h3 { color: var(--accent); margin-top: 0; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+    .item-list > div {
+      padding: 0.45rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.93rem;
+    }
+    .item-list > div:last-child { border-bottom: none; }
+    i { color: var(--text-muted); }
+
+    /* ── COST LINE ITEMS ─────────────────────────────────── */
+    .cost-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-type-badge {
+      font-family: var(--font-head);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--surface2);
+      border: 1px solid var(--accent-dim);
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      white-space: nowrap;
+    }
+    .cost-desc { flex: 1; color: var(--text); }
+    .cost-amt  { font-weight: 600; color: var(--text); white-space: nowrap; }
+    .cost-del-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.1rem 0.3rem;
+      line-height: 1;
+    }
+    .cost-del-btn:hover { color: var(--danger); background: transparent; }
+    #costsTotal {
+      padding: 0.4rem 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: right;
+      max-width: 480px;
+    }
+    #costsSection hr { margin: 0.8rem 0; }
+    .status-row { display: flex; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.9rem; }
+    .status-row .slabel {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      min-width: 100px;
+      padding-top: 0.1rem;
+    }
+    .status-row .svalue { color: var(--text); }
+
+    /* ── LAYOUT ──────────────────────────────────────────── */
+
+    /* Two-column work order layout */
+    .wo-layout {
+      display: grid;
+      grid-template-columns: 38% 1fr;
+      gap: 0 1.5rem;
+      align-items: start;
+    }
+    .wo-left  { min-width: 0; }
+    .wo-right {
+      min-width: 0;
+      border-left: 1px solid var(--border);
+      padding-left: 1.5rem;
+    }
+
+    /* Form grid: fields side by side */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem 1rem;
+      margin-bottom: 0.6rem;
+    }
+    .form-grid .field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .form-grid input,
+    .form-grid select { width: 100%; max-width: 100%; margin-bottom: 0; }
+    .form-grid .field-wide {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .form-grid .field-wide input,
+    .form-grid .field-wide select { max-width: 100%; }
+
+    /* Inline checkbox in a form-grid cell */
+    .form-grid .field-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 1.4rem; /* align with inputs */
+    }
+    .form-grid .field-check label {
+      margin: 0;
+      text-transform: none;
+      letter-spacing: normal;
+      font-size: 0.93rem;
+      color: var(--text);
+    }
+
+    /* Task checkbox rows in work order */
+    #tasks .check-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    #tasks .check-row:last-child { border-bottom: none; }
+    #tasks .check-row input[type="checkbox"] {
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+    #tasks .check-row label {
+      margin: 0;
+      text-transform: none;
+      letter-spacing: normal;
+      font-size: 0.9rem;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    /* Cost entry row */
+    .cost-entry-grid {
+      display: grid;
+      grid-template-columns: 130px 1fr 100px auto;
+      gap: 0.5rem;
+      align-items: end;
+      margin-bottom: 0.6rem;
+    }
+    .cost-entry-grid .field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .cost-entry-grid input,
+    .cost-entry-grid select { width: 100%; max-width: 100%; margin-bottom: 0; }
+  </style>
+</head>
+
+<body>
+
+<div id="app-header">
+  <h1>Wrench</h1>
+  <span>Vehicle Maintenance Tracker</span>
+</div>
+
+<div id="tab-bar">
+  <button onclick="showTab('work')"     id="tab-btn-work">Work Orders</button>
+  <button onclick="showTab('vehicles')" id="tab-btn-vehicles">Vehicles</button>
+  <button onclick="showTab('garages')"  id="tab-btn-garages">Garages</button>
+  <button onclick="showTab('schedule')" id="tab-btn-schedule">Maintenance Schedule</button>
+</div>
+
+<!-- WORK ORDERS -->
+<div id="tab-work">
+<div class="tab-content">
+
+  <div class="wo-layout">
+
+    <!-- ── LEFT COLUMN: header info ── -->
+    <div class="wo-left">
+
+      <h2>Work Orders</h2>
+
+      <div class="btn-row">
+        <button class="primary" onclick="startNewWorkOrder()">New Work Order</button>
+      </div>
+
+      <h3>Open Work Orders</h3>
+      <div id="openOrders"></div>
+
+          <hr>
+
+      <div id="wo_form" style="display:none;">
+
+        <h3 id="wo_mode_heading"></h3>
+        <p id="wo_instruction"></p>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Vehicle</label>
+            <select id="wo_vehicle"></select>
+          </div>
+          <div class="field">
+            <label>Garage</label>
+            <select id="wo_garage"></select>
+          </div>
+          <div class="field">
+            <label>Odometer</label>
+            <input id="odo" type="number" value="0">
+          </div>
+          <div class="field">
+            <label>Date</label>
+            <input id="date" type="date">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="previewBtn" class="primary" onclick="preview()">Preview Tasks</button>
+        </div>
+
+        <p id="wo_status"></p>
+
+        <div id="statusPanel" style="display:none; margin-top:0.8rem; padding:0.8rem 1rem; border:1px solid var(--accent-dim); border-radius:var(--radius); background:var(--surface);">
+          <h3 style="color:var(--accent); margin-top:0.5rem;">Work Order Summary</h3>
+          <div id="statusContent"></div>
+        </div>
+
+      </div><!-- /wo_form -->
+
+    </div><!-- /wo-left -->
+
+    <!-- ── RIGHT COLUMN: tasks + costs ── -->
+    
+    <div class="wo-right">
+      <div id="wo_detail" style="display:none;">
+
+        <h3 id="tasks_heading" style="display:none; margin-top:0;">Tasks</h3>
+        <div id="tasks"></div>
+
+        <div class="btn-row" style="margin-top:0.6rem;">
+          <button id="createBtn" class="primary" onclick="createWorkOrder()">Create Work Order</button>
+          <button id="completeBtn" class="primary" onclick="completeWorkOrder()">Complete Work Order</button>
+        </div>
+
+        <!-- COSTS SECTION — visible in created/viewing modes only -->
+        <div id="costsSection" style="display:none;">
+          <h3>Cost Line Items</h3>
+
+          <div id="costsList"></div>
+          <div id="costsTotal"></div>
+
+          <hr>
+
+          <div class="cost-entry-grid">
+            <div class="field">
+              <label>Type</label>
+              <select id="cost_type">
+                <option value="SCHEDULED">Scheduled Task</option>
+                <option value="REPAIR">Repair</option>
+                <option value="SUPPLY">Supply / Part</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <input id="cost_description" type="text" placeholder="e.g. Oil filter, Brake line repair">
+            </div>
+            <div class="field">
+              <label>Cost ($)</label>
+              <input id="cost_amount" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <button class="primary" onclick="addCost()" style="white-space:nowrap;">Add</button>
+            </div>
+          </div>
+
+        </div><!-- /costsSection -->
+
+      </div><!-- /wo_detail -->
+    </div><!-- /wo-right -->
+
+  </div><!-- /wo-layout -->
+
+</div>
+</div>
+
+<!-- GARAGES -->
+<div id="tab-garages" style="display:none;">
+<div class="tab-content">
+  <h2>Garages</h2>
+
+  <div class="form-grid">
+    <div class="field">
+      <label>Name</label>
+      <input id="g_name" type="text" placeholder="Garage name">
+    </div>
+    <div class="field">
+      <label>Contact</label>
+      <input id="g_contact" type="text" placeholder="Contact name / phone">
+    </div>
+    <div class="field">
+      <label>Address Line 1</label>
+      <input id="g_address1" type="text" placeholder="Street address">
+    </div>
+    <div class="field">
+      <label>Address Line 2</label>
+      <input id="g_address2" type="text" placeholder="City, Province">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="createGarage()">Add Garage</button>
+  </div>
+
+  <h3>Garage List</h3>
+  <div id="garageList" class="item-list"></div>
+</div>
+</div>
+
+<!-- VEHICLES -->
+<div id="tab-vehicles" style="display:none;">
+<div class="tab-content">
+  <h2>Vehicles</h2>
+
+  <div class="form-grid">
+    <div class="field">
+      <label>Make</label>
+      <input id="v_make" type="text" placeholder="e.g. Honda">
+    </div>
+    <div class="field">
+      <label>Model</label>
+      <input id="v_model" type="text" placeholder="e.g. CB500F">
+    </div>
+    <div class="field">
+      <label>Year</label>
+      <input id="v_year" type="number" placeholder="e.g. 2021">
+    </div>
+    <div class="field">
+      <label>Purchase Date</label>
+      <input id="v_purchase" type="date">
+    </div>
+    <div class="field field-wide">
+      <label>VIN / Serial Number</label>
+      <input id="v_vin" type="text" placeholder="VIN or serial">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="createVehicle()">Add Vehicle</button>
+  </div>
+
+  <h3>Vehicle List</h3>
+  <div id="vehicleList" class="item-list"></div>
+</div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="tab-schedule" style="display:none;">
+<div class="tab-content">
+  <h2>Maintenance Schedule</h2>
+
+  <div class="form-grid">
+    <div class="field">
+      <label>Vehicle</label>
+      <select id="ms_vehicle"></select>
+    </div>
+    <div class="field field-wide">
+      <label>Task Description</label>
+      <input id="ms_task" type="text" placeholder="e.g. Oil Change">
+    </div>
+    <div class="field">
+      <label>Odo Interval</label>
+      <input id="ms_odo" type="number" placeholder="e.g. 5000">
+    </div>
+    <div class="field">
+      <label>Time Interval</label>
+      <input id="ms_time" type="text" placeholder="e.g. 1 year">
+    </div>
+    <div class="field-check">
+      <input type="checkbox" id="ms_one_time">
+      <label for="ms_one_time">One-time task</label>
+    </div>
+    <div class="field field-wide">
+      <label>Notes</label>
+      <input id="ms_notes" type="text" placeholder="Optional notes">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="createSchedule()">Add Task</button>
+  </div>
+
+  <h3>Schedule List</h3>
+  <div id="scheduleList"></div>
+
+  <!-- #status remains here for the schedule tab -->
+  <p id="status"></p>
+</div>
+</div>
+
+<script>
+function formatInterval(i) {
+  if (!i) return '-';
+
+  if (typeof i === 'string') return i;
+
+  const parts = [];
+
+  if (i.years) parts.push(`${i.years} yr`);
+  if (i.months) parts.push(`${i.months} mo`);
+  if (i.days) parts.push(`${i.days} d`);
+
+  if (i.milliseconds) {
+    const hours = Math.floor(i.milliseconds / (1000 * 60 * 60));
+    if (hours) parts.push(`${hours} h`);
+  }
+
+  return parts.length ? parts.join(' ') : '-';
+}
+
+let lastOrderId = null;
+let woMode = 'idle'; // 'idle' | 'new' | 'viewing' | 'created'
+
+document.getElementById('ms_vehicle')
+  .addEventListener('change', () => {
+    loadSchedule();
+  });
+
+/* ---------- MODE ---------- */
+
+//
+// Single source of truth for all work order UI state.
+// Every function that changes mode calls applyMode() — nothing
+// manually toggles individual buttons or fields outside of here.
+//
+function applyMode(mode) {
+  woMode = mode;
+
+  const heading     = document.getElementById('wo_mode_heading');
+  const instruction = document.getElementById('wo_instruction');
+  const tasksHdr    = document.getElementById('tasks_heading');
+  const previewBtn  = document.getElementById('previewBtn');
+  const createBtn   = document.getElementById('createBtn');
+  const completeBtn = document.getElementById('completeBtn');
+  const formIds     = ['wo_vehicle', 'wo_garage', 'odo', 'date'];
+
+  // Defaults — overridden per mode below
+  let headingText     = '';
+  let instructionText = '';
+  let formEnabled     = false;
+  let previewVisible  = false;
+  let createVisible   = false;
+  let completeVisible = false;
+  let costsVisible    = false;
+
+  if (mode === 'idle') {
+    headingText     = '';
+    instructionText = 'Select an open work order above, or click New Work Order to begin.';
+    formEnabled     = false;
+    previewVisible  = false;
+    createVisible   = false;
+    completeVisible = false;
+
+  } else if (mode === 'new') {
+    headingText     = 'New Work Order';
+    instructionText = 'Select a vehicle and garage, enter the current odometer reading and date, then click Preview Tasks.';
+    formEnabled     = true;
+    previewVisible  = true;
+    createVisible   = false;   // shown only after preview returns tasks
+    completeVisible = false;
+
+  } else if (mode === 'previewed') {
+    // Tasks have come back — user can now select and create
+    headingText     = 'New Work Order';
+    instructionText = 'Check the tasks to include, then click Create Work Order.';
+    formEnabled     = true;
+    previewVisible  = true;
+    createVisible   = true;
+    completeVisible = false;
+
+  } else if (mode === 'created') {
+    headingText     = `Work Order #${lastOrderId}`;
+    instructionText = 'Work order created. Carry out the work, then click Complete Work Order when done.';
+    formEnabled     = false;
+    previewVisible  = false;
+    createVisible   = false;
+    completeVisible = true;
+    costsVisible    = true;
+
+  } else if (mode === 'viewing') {
+    headingText     = `Work Order #${lastOrderId}`;
+    instructionText = 'Reviewing an open work order. Click Complete Work Order when the work is done.';
+    formEnabled     = false;
+    previewVisible  = false;
+    createVisible   = false;
+    completeVisible = true;
+    costsVisible    = true;
+  }
+
+  heading.innerText     = headingText;
+  instruction.innerText = instructionText;
+
+  formIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !formEnabled;
+  });
+  document.querySelectorAll('#tasks input[type="checkbox"]')
+    .forEach(cb => cb.disabled = !formEnabled);
+
+  previewBtn.style.display  = previewVisible  ? 'inline-block' : 'none';
+  createBtn.style.display   = createVisible   ? 'inline-block' : 'none';
+  completeBtn.style.display = completeVisible ? 'inline-block' : 'none';
+  tasksHdr.style.display    = (previewVisible || createVisible || completeVisible) ? 'block' : 'none';
+
+  const costsSection = document.getElementById('costsSection');
+  if (costsSection) costsSection.style.display = costsVisible ? 'block' : 'none';
+    const woForm   = document.getElementById('wo_form');
+  const woDetail = document.getElementById('wo_detail');
+  if (woForm)   woForm.style.display   = (mode === 'idle') ? 'none' : 'block';
+  if (woDetail) woDetail.style.display = (mode === 'idle') ? 'none' : 'block';
+}
+
+/* ---------- UTIL ---------- */
+
+function setWoStatus(msg, isError = false) {
+  const el = document.getElementById('wo_status');
+  if (!el) return;
+  el.innerText = msg;
+  el.style.color = isError ? 'red' : 'green';
+}
+
+function setStatus(msg, isError = false) {
+  const el = document.getElementById('status');
+  if (!el) return;
+  el.innerText = msg;
+  el.style.color = isError ? 'red' : 'green';
+}
+
+function getSelectedTasks() {
+  return Array.from(
+    document.querySelectorAll('#tasks input:checked')
+  ).map(cb => parseInt(cb.value));
+}
+
+function updateCreateButton() {
+  // In 'previewed' mode the Create button is visible;
+  // disable it only if nothing is checked.
+  const createBtn = document.getElementById('createBtn');
+  if (woMode === 'previewed') {
+    createBtn.disabled = getSelectedTasks().length === 0;
+  }
+}
+
+/* ---------- STATUS PANEL ---------- */
+
+function showStatusPanel(rows) {
+  const content = document.getElementById('statusContent');
+  content.innerHTML = rows.map(([label, value]) =>
+    `<div class="status-row">
+      <span class="slabel">${label}</span>
+      <span class="svalue">${value}</span>
+    </div>`
+  ).join('');
+  document.getElementById('statusPanel').style.display = 'block';
+}
+
+function clearStatusPanel() {
+  document.getElementById('statusContent').innerHTML = '';
+  document.getElementById('statusPanel').style.display = 'none';
+}
+
+/* ---------- COSTS ---------- */
+
+async function loadCosts(orderId) {
+  const res = await fetch(`http://localhost:3000/work-orders/${orderId}/costs`);
+  if (!res.ok) return;
+  const items = await res.json();
+  renderCosts(items);
+}
+
+function renderCosts(items) {
+  const list  = document.getElementById('costsList');
+  const total = document.getElementById('costsTotal');
+
+  if (items.length === 0) {
+    list.innerHTML  = '<i>No cost items yet.</i>';
+    total.innerText = '';
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <div class="cost-row">
+      <span class="cost-type-badge">${item.cost_type}</span>
+      <span class="cost-desc">${item.description}</span>
+      <span class="cost-amt">$${parseFloat(item.cost).toFixed(2)}</span>
+      <button class="cost-del-btn" onclick="deleteCost(${item.workorder_costs_id})" title="Remove">&#x2715;</button>
+    </div>
+  `).join('');
+
+  const sum = items.reduce((acc, i) => acc + parseFloat(i.cost), 0);
+  total.innerHTML = `<span style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em;">Total</span>&nbsp;&nbsp;$${sum.toFixed(2)}`;
+}
+
+async function addCost() {
+  const description = document.getElementById('cost_description').value.trim();
+  const cost        = document.getElementById('cost_amount').value;
+  const cost_type   = document.getElementById('cost_type').value;
+
+  if (!description || !cost) {
+    setWoStatus('Description and cost are required.', true);
+    return;
+  }
+
+  const res = await fetch(`http://localhost:3000/work-orders/${lastOrderId}/costs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description, cost, cost_type })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    setWoStatus(err.error || 'Failed to add cost item.', true);
+    return;
+  }
+
+  document.getElementById('cost_description').value  = '';
+  document.getElementById('cost_amount').value       = '';
+  document.getElementById('cost_type').selectedIndex = 0;
+  document.getElementById('cost_description').focus();
+  setWoStatus('');
+  loadCosts(lastOrderId);
+}
+
+async function deleteCost(costId) {
+  const res = await fetch(
+    `http://localhost:3000/work-orders/${lastOrderId}/costs/${costId}`,
+    { method: 'DELETE' }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    setWoStatus(err.error || 'Failed to delete cost item.', true);
+    return;
+  }
+
+  loadCosts(lastOrderId);
+}
+
+/* ---------- WORK ORDERS ---------- */
+
+function startNewWorkOrder() {
+  lastOrderId = null;
+
+  // Clear form inputs so there's no stale data from a previous order
+  document.getElementById('wo_vehicle').selectedIndex = 0;
+  document.getElementById('wo_garage').selectedIndex  = 0;
+  document.getElementById('odo').value  = '';
+  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('tasks').innerHTML = '';
+  clearStatusPanel();
+  setWoStatus('');
+
+  applyMode('new');
+}
+
+async function preview() {
+  const vehicleId = document.getElementById('wo_vehicle').value;
+  const odo       = document.getElementById('odo').value;
+  const date      = document.getElementById('date').value;
+
+  if (!odo || !date) {
+    setWoStatus('Odometer and date are required.', true);
+    return;
+  }
+
+  setWoStatus('');
+  document.getElementById('tasks').innerHTML = '';
+
+  const res = await fetch(
+    `http://localhost:3000/vehicles/${vehicleId}/tasks/preview?odo=${odo}&date=${date}`
+  );
+  const data = await res.json();
+
+  if (data.length === 0) {
+    document.getElementById('tasks').innerHTML = '<i>No tasks due at this odometer / date.</i>';
+    // Stay in 'new' mode — no tasks to create an order from
+    applyMode('new');
+    setWoStatus('No tasks are due. Adjust the odometer or date if this seems wrong.', false);
+    return;
+  }
+
+  const container = document.getElementById('tasks');
+  data.forEach(task => {
+    const cb = document.createElement('input');
+    cb.type     = 'checkbox';
+    cb.value    = task.task_id;
+    cb.checked  = true;
+    cb.onchange = updateCreateButton;
+
+    const label = document.createElement('label');
+    label.innerText =
+      `${task.task_description}` +
+      ` (next odo: ${task.calculated_next_due_odo ?? '-'},` +
+      ` date: ${task.calculated_next_due_date ?? '-'})`;
+
+    const div = document.createElement('div');
+    div.className = 'check-row';
+    div.appendChild(cb);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
+
+  applyMode('previewed');
+}
+
+async function createWorkOrder() {
+  const vehicleSelect = document.getElementById('wo_vehicle');
+  const garageSelect  = document.getElementById('wo_garage');
+  const odo  = document.getElementById('odo').value;
+  const date = document.getElementById('date').value;
+
+  const vehicleLabel = vehicleSelect.options[vehicleSelect.selectedIndex]?.text ?? '—';
+  const garageLabel  = garageSelect.options[garageSelect.selectedIndex]?.text  ?? '—';
+
+  const taskLabels = Array.from(
+    document.querySelectorAll('#tasks input:checked')
+  ).map(cb => cb.nextSibling?.innerText?.trim() ?? `Task ${cb.value}`);
+
+  const res = await fetch('http://localhost:3000/work-orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      vehicle_id: parseInt(vehicleSelect.value),
+      garage_id:  parseInt(garageSelect.value),
+      odo:        parseInt(odo),
+      date,
+      task_ids: getSelectedTasks(),
+      notes: 'UI created'
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    setWoStatus(err.error || 'Failed to create work order.', true);
+    return;
+  }
+
+  const data = await res.json();
+  lastOrderId = data.order_id;
+
+  applyMode('created');
+  loadCosts(lastOrderId);
+
+  showStatusPanel([
+    ['Work Order',  `#${data.order_id}`],
+    ['Vehicle',     vehicleLabel],
+    ['Garage',      garageLabel],
+    ['Odometer',    parseInt(odo).toLocaleString()],
+    ['Date',        date],
+    ['Tasks',       taskLabels.join(', ')],
+  ]);
+
+  loadOpenWorkOrders();
+}
+
+async function completeWorkOrder() {
+  if (!lastOrderId) return;
+
+  const res = await fetch(
+    `http://localhost:3000/work-orders/${lastOrderId}/complete`,
+    { method: 'POST' }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    setWoStatus(err.error || 'Failed to complete work order.', true);
+    return;
+  }
+
+  clearStatusPanel();
+  document.getElementById('tasks').innerHTML     = '';
+  document.getElementById('costsList').innerHTML  = '';
+  document.getElementById('costsTotal').innerText = '';
+  setWoStatus('');
+  lastOrderId = null;
+
+  applyMode('idle');
+  loadOpenWorkOrders();
+}
+
+async function loadOpenWorkOrders() {
+  const res = await fetch('http://localhost:3000/work-orders/open');
+  const data = await res.json();
+
+  const container = document.getElementById('openOrders');
+  container.innerHTML = '';
+
+  if (data.length === 0) {
+    container.innerHTML = '<i>No open work orders.</i>';
+    return;
+  }
+
+  data.forEach(o => {
+    const btn = document.createElement('button');
+    btn.innerText = `Order #${o.order_id} — ${o.make} ${o.model} (${o.order_date.split('T')[0]})`;
+    btn.onclick   = () => loadOrderDetails(o.order_id);
+    container.appendChild(btn);
+  });
+}
+
+async function loadOrderDetails(id) {
+  const res = await fetch(`http://localhost:3000/work-orders/${id}`);
+  const data = await res.json();
+
+  const { header, tasks } = data;
+
+  document.getElementById('wo_vehicle').value = header.vehicle_id;
+  document.getElementById('wo_garage').value  = header.garage_id;
+  document.getElementById('odo').value         = header.odo;
+  document.getElementById('date').value        = header.order_date.split('T')[0];
+
+  const container = document.getElementById('tasks');
+  container.innerHTML = '';
+
+  tasks.forEach(t => {
+    const cb = document.createElement('input');
+    cb.type    = 'checkbox';
+    cb.checked = true;
+
+    const label = document.createElement('label');
+    label.innerText = t.task_description;
+
+    const div = document.createElement('div');
+    div.className = 'check-row';
+    div.appendChild(cb);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
+
+  lastOrderId = id;
+  applyMode('viewing');
+  loadCosts(id);
+
+  const vehicleSelect = document.getElementById('wo_vehicle');
+  const garageSelect  = document.getElementById('wo_garage');
+
+  showStatusPanel([
+    ['Work Order',  `#${id}`],
+    ['Vehicle',     vehicleSelect.options[vehicleSelect.selectedIndex]?.text ?? '—'],
+    ['Garage',      garageSelect.options[garageSelect.selectedIndex]?.text  ?? '—'],
+    ['Odometer',    parseInt(header.odo).toLocaleString()],
+    ['Date',        header.order_date.split('T')[0]],
+    ['Tasks',       tasks.map(t => t.task_description).join(', ')],
+  ]);
+}
+
+/* ---------- GARAGES ---------- */
+
+async function loadGarages() {
+  const res = await fetch('http://localhost:3000/garages');
+  const data = await res.json();
+
+  const container = document.getElementById('garageList');
+  const dropdown = document.getElementById('wo_garage');
+
+  container.innerHTML = '';
+  dropdown.innerHTML = '';
+
+  data.forEach(g => {
+    container.innerHTML += `<div>${g.name}</div>`;
+
+    const opt = document.createElement('option');
+    opt.value = g.garage_id;
+    opt.text = g.name;
+    dropdown.appendChild(opt);
+  });
+}
+
+async function createGarage() {
+  // FIX #3: Use getElementById instead of bare global ID references
+  await fetch('http://localhost:3000/garages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name:     document.getElementById('g_name').value,
+      address1: document.getElementById('g_address1').value,
+      address2: document.getElementById('g_address2').value,
+      contact:  document.getElementById('g_contact').value
+    })
+  });
+
+  loadGarages();
+}
+
+/* ---------- VEHICLES ---------- */
+
+async function loadVehicles() {
+  const res = await fetch('http://localhost:3000/vehicles');
+  const data = await res.json();
+
+  const list = document.getElementById('vehicleList');
+  const wo   = document.getElementById('wo_vehicle');
+  const ms   = document.getElementById('ms_vehicle');
+
+  list.innerHTML = '';
+  wo.innerHTML   = '';
+  ms.innerHTML   = '';
+
+  data.forEach(v => {
+    const label = `${v.make} ${v.model}`;
+
+    list.innerHTML += `<div>${label}</div>`;
+
+    wo.appendChild(new Option(label, v.vehicle_id));
+    ms.appendChild(new Option(label, v.vehicle_id));
+  });
+
+  // FIX #1 & #2: Run AFTER the loop so all options exist,
+  // and only once rather than on every iteration.
+  if (data.length > 0) {
+    document.getElementById('ms_vehicle').value = data[0].vehicle_id;
+    loadSchedule();
+  }
+}
+
+async function createVehicle() {
+  // FIX #3: Use getElementById instead of bare global ID references
+  await fetch('http://localhost:3000/vehicles', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      make:          document.getElementById('v_make').value,
+      model:         document.getElementById('v_model').value,
+      year:      parseInt(document.getElementById('v_year').value),
+      vin:           document.getElementById('v_vin').value,
+      purchase_date: document.getElementById('v_purchase').value
+    })
+  });
+
+  loadVehicles();
+}
+
+/* ---------- SCHEDULE ---------- */
+
+let currentRequest = 0;
+
+async function loadSchedule() {
+  const container = document.getElementById('scheduleList');
+  const vehicleId = document.getElementById('ms_vehicle').value;
+
+  if (!vehicleId) return;
+
+  const requestId = ++currentRequest;
+
+  container.style.opacity = 0.5;
+
+  try {
+    const res = await fetch(
+      `http://localhost:3000/schedule?vehicle_id=${vehicleId}`
+    );
+
+    const data = await res.json();
+
+    if (requestId !== currentRequest) return;
+
+    const fragment = document.createDocumentFragment();
+
+    if (data.length === 0) {
+      const empty = document.createElement('div');
+      empty.innerHTML = '<i>No tasks yet for this vehicle</i>';
+      fragment.appendChild(empty);
+    } else {
+      data.forEach(s => {
+        const div = document.createElement('div');
+        div.innerText =
+          `${s.task_description} ` +
+          `(odo: ${s.odo_interval ?? '-'}, time: ${formatInterval(s.time_interval)})` +
+          (s.is_one_time ? ' [one-time]' : '');
+
+        fragment.appendChild(div);
+      });
+    }
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
+
+  } catch (err) {
+    container.innerHTML = '<i>Error loading schedule</i>';
+    console.error(err);
+  } finally {
+    container.style.opacity = 1;
+  }
+}
+
+async function createSchedule() {
+  try {
+    const res = await fetch('http://localhost:3000/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vehicle_id:       parseInt(document.getElementById('ms_vehicle').value),
+        task_description: document.getElementById('ms_task').value,
+        odo_interval:     document.getElementById('ms_odo').value || null,
+        time_interval:    document.getElementById('ms_time').value || null,
+        notes:            document.getElementById('ms_notes').value,
+        is_one_time:      document.getElementById('ms_one_time').checked
+      })
+    });
+
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text);
+    }
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    document.getElementById('ms_task').value      = '';
+    document.getElementById('ms_odo').value       = '';
+    document.getElementById('ms_time').value      = '';
+    document.getElementById('ms_notes').value     = '';
+    document.getElementById('ms_one_time').checked = false;
+
+    loadSchedule();
+
+    document.getElementById('ms_task').focus();
+
+  } catch (err) {
+    console.error(err);
+    setStatus(err.message, true);
+  }
+}
+
+/* ---------- TABS ---------- */
+
+function showTab(tabName) {
+  const tabs = ['work', 'vehicles', 'garages', 'schedule'];
+  tabs.forEach(t => {
+    const tab = document.getElementById(`tab-${t}`);
+    const btn = document.getElementById(`tab-btn-${t}`);
+    if (tab) tab.style.display = (t === tabName) ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', t === tabName);
+  });
+}
+
+/* ---------- INIT ---------- */
+
+loadGarages();
+loadVehicles();
+loadOpenWorkOrders();
+applyMode('idle');
+showTab('work');
+
+</script>
+
+</body>
+</html>
