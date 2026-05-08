@@ -1,3 +1,5 @@
+TL;DR: INSTALL.md has fairly detailed instructions on how to install the app.
+
 Wrench Vehicle Maintenance Tracker
 
 The intention was to create a very simple tool to track service and maintenance on vehicles and equipment. It was originally developed with Microsoft Access (many years ago). I decided to migrate the db to PostgreSQL, create a web-based interface, and containered the whole thing. I hope that you may find it useful.
