@@ -1310,7 +1310,7 @@ async function loadAllTasks() {
     // Build secondary due-info line
     const dueParts = [];
     if (task.calculated_next_due_odo)
-      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()} km`);
+      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()}`);
     if (task.calculated_next_due_date)
       dueParts.push(new Date(task.calculated_next_due_date).toLocaleDateString());
 
@@ -1411,7 +1411,7 @@ async function preview() {
     // Build secondary due-info line — only show what's relevant
     const dueParts = [];
     if (task.calculated_next_due_odo)
-      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()} km`);
+      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()}`);
     if (task.calculated_next_due_date)
       dueParts.push(new Date(task.calculated_next_due_date).toLocaleDateString());
 
