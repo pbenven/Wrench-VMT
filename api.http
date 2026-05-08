@@ -1,0 +1,24 @@
+### Health
+GET http://localhost:3000/health
+
+
+### Preview tasks
+GET http://localhost:3000/vehicles/1/tasks/preview?odo=60&date=2026-09-20
+
+
+### Create work order
+POST http://localhost:3000/work-orders
+Content-Type: application/json
+
+{
+  "vehicle_id": 1,
+  "garage_id": 1,
+  "odo": 60,
+  "date": "2026-09-20",
+  "task_ids": [3,9],
+  "notes": "VS Code test"
+}
+
+
+### Complete work order
+POST http://localhost:3000/work-orders/8/complete
