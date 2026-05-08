@@ -1068,8 +1068,15 @@ function getSelectedTasks() {
 
 function updateCreateButton() {
   const createBtn = document.getElementById('createBtn');
+  const selected = getSelectedTasks().length;
   if (woMode === 'previewed') {
-    createBtn.disabled = getSelectedTasks().length === 0;
+    createBtn.disabled = selected === 0;
+  } else if (woMode === 'new' && selected > 0) {
+    // Tasks selected from Show All while no preview was run
+    applyMode('previewed');
+    createBtn.disabled = false;
+  } else if (woMode === 'new' && selected === 0) {
+    applyMode('new');
   }
 }
 
