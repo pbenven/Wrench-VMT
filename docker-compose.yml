@@ -1,0 +1,33 @@
+services:
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - vehicle_maintenance_pgdata:/var/lib/postgresql
+    env_file:
+      - .env
+    networks:
+      - vm_net
+    restart: unless-stopped
+
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./public:/app/public
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - vm_net
+    restart: unless-stopped
+
+networks:
+  vm_net:
+
+volumes:
+  vehicle_maintenance_pgdata:
