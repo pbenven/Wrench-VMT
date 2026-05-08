@@ -1234,40 +1234,39 @@ async function loadAllTasks() {
   const vehicleId = document.getElementById('wo_vehicle').value;
   if (!vehicleId) return;
 
-  // Collect buffer values and current odo/date for dot colouring
+  const odo  = document.getElementById('odo').value;
+  const date = document.getElementById('date').value;
+
+  // Collect buffer values for dot colouring
   const upcomingChecked = document.getElementById('upcoming_chk').checked;
   const odoBuf   = upcomingChecked ? (parseInt(document.getElementById('buf_odo').value)    || 0) : 0;
   const monthBuf = upcomingChecked ? (parseInt(document.getElementById('buf_months').value) || 0) : 0;
   const daysBuf  = monthBuf * 30;
-  const currentOdo  = parseInt(document.getElementById('odo').value)  || 0;
-  const currentDate = new Date(document.getElementById('date').value);
+  const currentOdo  = parseInt(odo)  || 0;
+  const currentDate = new Date(date);
 
-  // Fetch full schedule for vehicle
-  const schedRes = await fetch(`/schedule?vehicle_id=${vehicleId}`);
+  // Fetch full schedule with calculated due values
+  const schedRes = await fetch(`/schedule/status?vehicle_id=${vehicleId}&odo=${odo || 0}&date=${date || new Date().toISOString().split('T')[0]}`);
   const schedData = await schedRes.json();
 
   // Fetch preview with buffers to know which tasks are due/due-soon
-  let dueTaskIds = new Set();
-  let dueSoonIds = new Set();
-  if (upcomingChecked && (odoBuf > 0 || daysBuf > 0)) {
+  let dueTaskIds  = new Set();
+  let dueSoonIds  = new Set();
+  if (odo && date) {
     try {
-      const odo  = document.getElementById('odo').value;
-      const date = document.getElementById('date').value;
-      if (odo && date) {
-        const prevRes  = await fetch(
-          `/vehicles/${vehicleId}/tasks/preview?odo=${odo}&date=${date}&odo_buffer=${odoBuf}&days_buffer=${daysBuf}`
-        );
-        const prevData = await prevRes.json();
-        prevData.forEach(t => {
-          const nextOdo  = t.calculated_next_due_odo  ? parseInt(t.calculated_next_due_odo)  : null;
-          const nextDate = t.calculated_next_due_date ? new Date(t.calculated_next_due_date) : null;
-          const odoOvr   = nextOdo  !== null && nextOdo  <= currentOdo;
-          const dateOvr  = nextDate !== null && nextDate <= currentDate;
-          if (odoOvr || dateOvr) dueTaskIds.add(t.task_id);
-          else                   dueSoonIds.add(t.task_id);
-        });
-      }
-    } catch(e) { /* silently ignore preview errors in this context */ }
+      const prevRes  = await fetch(
+        `/vehicles/${vehicleId}/tasks/preview?odo=${odo}&date=${date}&odo_buffer=${odoBuf}&days_buffer=${daysBuf}`
+      );
+      const prevData = await prevRes.json();
+      prevData.forEach(t => {
+        const nextOdo  = t.calculated_next_due_odo  ? parseInt(t.calculated_next_due_odo)  : null;
+        const nextDate = t.calculated_next_due_date ? new Date(t.calculated_next_due_date) : null;
+        const odoOvr   = nextOdo  !== null && nextOdo  <= currentOdo;
+        const dateOvr  = nextDate !== null && nextDate <= currentDate;
+        if (odoOvr || dateOvr) dueTaskIds.add(t.task_id);
+        else                   dueSoonIds.add(t.task_id);
+      });
+    } catch(e) { /* silently ignore */ }
   }
 
   const container = document.getElementById('allTasks');
@@ -1278,7 +1277,7 @@ async function loadAllTasks() {
     return;
   }
 
-  const nonDue = schedData.filter(t => !currentOrderTaskIds.has(t.task_id));
+  const nonDue  = schedData.filter(t => !currentOrderTaskIds.has(t.task_id));
   const already = schedData.filter(t =>  currentOrderTaskIds.has(t.task_id));
 
   [...nonDue, ...already].forEach(task => {
@@ -1301,13 +1300,33 @@ async function loadAllTasks() {
     cb.checked  = false;
     if (!isAlready) cb.onchange = updateCreateButton;
 
+    // Build secondary due-info line
+    const dueParts = [];
+    if (task.calculated_next_due_odo)
+      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()} km`);
+    if (task.calculated_next_due_date)
+      dueParts.push(new Date(task.calculated_next_due_date).toLocaleDateString());
+
     const label = document.createElement('label');
-    label.innerHTML = isAlready
-      ? `${task.task_description} <span style="font-size:0.75rem; color:var(--text-muted);">(already included)</span>`
-      : task.task_description;
+    label.style.display       = 'flex';
+    label.style.flexDirection = 'column';
+    label.style.gap           = '0.1rem';
+
+    if (isAlready) {
+      label.innerHTML = `
+        <span>${task.task_description} <span style="font-size:0.75rem; color:var(--text-muted);">(already included)</span></span>
+        ${dueParts.length ? `<span style="font-size:0.78rem; color:var(--text-muted);">${dueParts.join(' &middot; ')}</span>` : ''}
+      `;
+    } else {
+      label.innerHTML = `
+        <span>${task.task_description}</span>
+        ${dueParts.length ? `<span style="font-size:0.78rem; color:var(--text-muted);">${dueParts.join(' &middot; ')}</span>` : ''}
+      `;
+    }
 
     const div = document.createElement('div');
-    div.className = 'check-row' + (isAlready ? ' already-added' : '');
+    div.className  = 'check-row' + (isAlready ? ' already-added' : '');
+    div.style.alignItems = 'flex-start';
     div.appendChild(dot);
     div.appendChild(cb);
     div.appendChild(label);
@@ -1346,8 +1365,8 @@ async function preview() {
 
   if (data.length === 0) {
     container.innerHTML = '<i>No tasks due at this odometer / date.</i>';
-    document.getElementById('showAllRow').style.display = 'block';
     applyMode('new');
+    document.getElementById('showAllRow').style.display = 'block';
     setWoStatus('No tasks are due. You can expand all scheduled tasks below.', false);
     return;
   }
@@ -1382,14 +1401,25 @@ async function preview() {
     cb.checked  = true;
     cb.onchange = updateCreateButton;
 
+    // Build secondary due-info line — only show what's relevant
+    const dueParts = [];
+    if (task.calculated_next_due_odo)
+      dueParts.push(`due at ${parseInt(task.calculated_next_due_odo).toLocaleString()} km`);
+    if (task.calculated_next_due_date)
+      dueParts.push(new Date(task.calculated_next_due_date).toLocaleDateString());
+
     const label = document.createElement('label');
-    label.innerText =
-      `${task.task_description}` +
-      ` (next odo: ${task.calculated_next_due_odo ?? '-'},` +
-      ` date: ${task.calculated_next_due_date ?? '-'})`;
+    label.style.display = 'flex';
+    label.style.flexDirection = 'column';
+    label.style.gap = '0.1rem';
+    label.innerHTML = `
+      <span>${task.task_description}</span>
+      ${dueParts.length ? `<span style="font-size:0.78rem; color:var(--text-muted);">${dueParts.join(' &middot; ')}</span>` : ''}
+    `;
 
     const div = document.createElement('div');
     div.className = 'check-row';
+    div.style.alignItems = 'flex-start';
     div.appendChild(dot);
     div.appendChild(cb);
     div.appendChild(label);
@@ -1411,7 +1441,7 @@ async function createWorkOrder() {
 
   const taskLabels = Array.from(
     document.querySelectorAll('#tasks input:checked')
-  ).map(cb => cb.nextSibling?.innerText?.trim() ?? `Task ${cb.value}`);
+  ).map(cb => cb.nextSibling?.querySelector('span')?.innerText?.trim() ?? cb.nextSibling?.innerText?.trim() ?? `Task ${cb.value}`);
 
   const res = await fetch('/work-orders', {
     method: 'POST',

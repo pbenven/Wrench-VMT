@@ -364,6 +364,39 @@ app.post('/schedule', async (req, res) => {
   }
 });
 
+// Get schedule with calculated due values for a vehicle
+app.get('/schedule/status', async (req, res) => {
+  try {
+    const { vehicle_id, odo, date } = req.query;
+
+    if (!vehicle_id || !odo || !date) {
+      return res.status(400).json({ error: 'vehicle_id, odo, and date are required' });
+    }
+
+    const vehicleId = parseIntParam(vehicle_id, 'vehicle_id');
+
+    const result = await pool.query(`
+      SELECT
+        ms.task_id,
+        ms.task_description,
+        ms.odo_interval,
+        ms.time_interval,
+        ms.is_one_time,
+        ms.notes,
+        v.calculated_next_due_odo,
+        v.calculated_next_due_date
+      FROM maintenance_schedule ms
+      JOIN vw_tasks_due v ON v.task_id = ms.task_id
+      WHERE ms.vehicle_id = $1
+      ORDER BY ms.task_id
+    `, [vehicleId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // Update schedule task
 app.put('/schedule/:id', async (req, res) => {
   try {
