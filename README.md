@@ -33,3 +33,6 @@ Key workflows
 
   - From the Vehicles tab, clicking the Summary button under the Reports column in the Vehicle List will produce a summary report of all work orders performed for that vehicle
   - From the Vehicles tab, clicking the History button under the Reports column in the Vehicle List will produce a detailed report of all work orders performed for that vehicle
+ 
+  <img width="1494" height="857" alt="image" src="https://github.com/user-attachments/assets/6c99ad03-9545-43be-9cdd-c29e7773698f" />
+
