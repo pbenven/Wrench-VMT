@@ -1,4 +1,4 @@
-TL;DR: INSTALL.md has fairly detailed instructions on how to install the app.
+INSTALL.md has fairly detailed instructions on how to install the app.
 
 Wrench Vehicle Maintenance Tracker
 
